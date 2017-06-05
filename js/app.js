@@ -45,18 +45,18 @@ Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
     this.x, this.y);
 };
-Player.prototype.handleInput = function(direction){
-    if (direction == 'left'){
+Player.prototype.handleInput = function(allowedKeys){
+    if (allowedKeys == 'left'){
         this.x -= 20;
     }
-    else if (direction == 'right'){
+    else if (allowedKeys == 'right'){
         this.x += 20;
     }
-    else if (direction == 'up'){
-        this.y += 20;
+    else if (allowedKeys == 'up'){
+        this.y -= 20;
     }
     else {
-        this.y -= 20;
+        this.y += 20;
     }
 
 };
