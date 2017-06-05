@@ -51,7 +51,7 @@ var enemy3 = new Enemy(25, 300);
 
 var allEnemies = [enemy1, enemy2, enemy3];
 
-var player = new Player(250, 400);
+var player = new Player(200, 400);
 
 
 // This listens for key presses and sends the keys to your
