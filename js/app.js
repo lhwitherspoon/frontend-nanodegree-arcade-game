@@ -11,9 +11,9 @@ var Enemy = function(x, y, speed) {
     this.height = 65; //setting a working height for now
     //set random initial x & y coordinates for each enemy;
     this.x = Math.floor(Math.random() * 11) + 15;
-    this.y = Math.floor(Math.random() * 301) + 50;
+    this.y = Math.floor(Math.random() * 251) + 50;
 
-    this.speed = Math.floor(Math.random() * 76) + 25;
+    this.speed = Math.floor(Math.random() * 151) + 50;
 };
 
 // Update the enemy's position, required method for game
@@ -23,12 +23,14 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
     this.x = this.x + this.speed * dt;
+    //the following resets the enemy's position to the left side of the board and randomizes the speed as well as the x & y coordinates.
     if (this.x > 500) {
         this.x = Math.floor(Math.random() * 11) + 15;
         this.y = Math.floor(Math.random() * 201) + 100;
-        this.speed = Math.floor(Math.random() * 76) + 25;
+        this.speed = Math.floor(Math.random() * 151) + 50;
 
     }
+    //calls the checkCollisions function.
     this.checkCollisions();
 };
 
@@ -50,7 +52,18 @@ Enemy.prototype.checkCollisions = function() {
         console.log("collision detected!");
         player.x = 225;
         player.y = 400;
-
+        player.lives = player.lives - 1; {
+            //clearRect(25, 25, 100, 50);
+            ctx.font = '18px Sans Serif';
+            ctx.textBaseline = 'top';
+            ctx.fillText('Lives: ' + player.lives, 25, 25);
+        }
+        if (player.lives == 0) {
+            //clearRect(25, 25, 100, 50);
+            ctx.font = '36px Sans Serif';
+            ctx.textBaseline = 'top';
+            ctx.fillText('Game over!', 25, 25);
+        }
     }
 };
 
@@ -58,13 +71,15 @@ Enemy.prototype.checkCollisions = function() {
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function(x, y, speed) {
+var Player = function(x, y, lives) {
     this.sprite = 'images/char-boy.png';
     this.width = 50; //setting a working width
     this.height = 50; //setting a working height
     this.x = x;
     this.y = y;
-    this.speed = speed;
+    this.lives = lives;
+    this.gemScore = 0;
+
 };
 
 
@@ -82,7 +97,13 @@ Player.prototype.update = function(dt) {
     if (this.y < -15) {
         this.x = 225;
         this.y = 400;
+        player.lives = player.lives + 1;
+        //clearRect(25, 25, 100, 50);
+        ctx.font = '18px Sans Serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Lives: ' + player.lives, 25, 25);
     }
+    this.checkGemCollisions();
 
 };
 Player.prototype.render = function() {
@@ -93,27 +114,63 @@ Player.prototype.render = function() {
 
 Player.prototype.handleInput = function(allowedKeys) {
     if (allowedKeys == 'left') {
-        this.x -= 15;
+        this.x -= 20;
     } else if (allowedKeys == 'right') {
-        this.x += 15;
+        this.x += 20;
     } else if (allowedKeys == 'up') {
-        this.y -= 15;
+        this.y -= 20;
     } else {
-        this.y += 15;
+        this.y += 20;
     }
+
+};
+
+Player.prototype.checkGemCollisions = function() {
+
+
+    //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+    var gemReset = function() {
+        gem.x = Math.floor(Math.random() * 301) + 100;
+        gem.y = Math.floor(Math.random() * 301) + 50;
+    };
+    if (gem.x < this.x + this.width &&
+        gem.x + gem.width > this.x &&
+        gem.y < this.y + this.height &&
+        gem.height + gem.y > this.y) {
+        player.y = 10;
+        player.gemScore = player.gemScore + 1; {
+            console.log("You have " + player.gemScore + "gems!")
+        };
+        setTimeout(gemReset, 1500)
+    }
+};
+var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
+var Gem = function(x, y) {
+    this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)]
+    this.width = 75
+    this.height = 75
+    this.x = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 301) + 50;
+}
+
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite),
+        this.x, this.y);
 
 };
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var bug1 = new Enemy(this.x, this.y, this.speed);
-var bug2 = new Enemy(this.x, this.y, this.speed);
-var bug3 = new Enemy(this.x, this.y, this.speed);
+var bug1 = new Enemy();
+var bug2 = new Enemy();
+var bug3 = new Enemy();
+//var bug4 = new Enemy();
 
 var allEnemies = [bug1, bug2, bug3];
 
-var player = new Player(200, 400);
+var player = new Player(200, 400, 10);
+var gem = new Gem();
 
 
 // This listens for key presses and sends the keys to your
