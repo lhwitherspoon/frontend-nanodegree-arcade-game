@@ -12,7 +12,6 @@ var Enemy = function(x, y, speed) {
     //set random initial x & y coordinates for each enemy;
     this.x = Math.floor(Math.random() * 11) + 15;
     this.y = Math.floor(Math.random() * 251) + 50;
-
     this.speed = Math.floor(Math.random() * 151) + 50;
 };
 
@@ -24,11 +23,10 @@ Enemy.prototype.update = function(dt) {
     // all computers.
     this.x = this.x + this.speed * dt;
     //the following resets the enemy's position to the left side of the board and randomizes the speed as well as the x & y coordinates.
-    if (this.x > 500) {
+    if (this.x + 25 > 500) {
         this.x = Math.floor(Math.random() * 11) + 15;
         this.y = Math.floor(Math.random() * 201) + 100;
         this.speed = Math.floor(Math.random() * 151) + 50;
-
     }
     //calls the checkCollisions function.
     this.checkCollisions();
@@ -52,20 +50,23 @@ Enemy.prototype.checkCollisions = function() {
         console.log("collision detected!");
         player.x = 225;
         player.y = 400;
-        player.lives = player.lives - 1; {
-            //clearRect(25, 25, 100, 50);
-            ctx.font = '18px Sans Serif';
-            ctx.textBaseline = 'top';
-            ctx.fillText('Lives: ' + player.lives, 25, 25);
-        }
+        player.lives = player.lives - 1;
+        player.displayLifeScore();
         if (player.lives == 0) {
-            //clearRect(25, 25, 100, 50);
-            ctx.font = '36px Sans Serif';
-            ctx.textBaseline = 'top';
-            ctx.fillText('Game over!', 25, 25);
+            ctx.clearRect(25, 25, 600, 50);
+            ctx.fillStyle = 'red'
+            ctx.font = 'bold 20px Sans Serif';
+            ctx.textBaseline = 'top'
+            ctx.textAlign = 'center'
+            ctx.fillText('Game over!', 200, 25);
+            player.x = 225;
+            player.y = 400;
+            gameReset();
+
         }
     }
 };
+
 
 
 // Now write your own player class
@@ -79,9 +80,7 @@ var Player = function(x, y, lives) {
     this.y = y;
     this.lives = lives;
     this.gemScore = 0;
-
 };
-
 
 Player.prototype.update = function(dt) {
     //this.handleInput();
@@ -98,10 +97,8 @@ Player.prototype.update = function(dt) {
         this.x = 225;
         this.y = 400;
         player.lives = player.lives + 1;
-        //clearRect(25, 25, 100, 50);
-        ctx.font = '18px Sans Serif';
-        ctx.textBaseline = 'top';
-        ctx.fillText('Lives: ' + player.lives, 25, 25);
+        player.displayLifeScore();
+
     }
     this.checkGemCollisions();
 
@@ -112,6 +109,12 @@ Player.prototype.render = function() {
 
 };
 
+Player.prototype.displayLifeScore = function() {
+    ctx.clearRect(25, 25, 100, 50);
+    ctx.font = '18px Sans Serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Lives: ' + player.lives, 25, 25);
+};
 Player.prototype.handleInput = function(allowedKeys) {
     if (allowedKeys == 'left') {
         this.x -= 20;
@@ -127,8 +130,8 @@ Player.prototype.handleInput = function(allowedKeys) {
 var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
 var Gem = function(x, y) {
     this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)]
-    this.width = 75
-    this.height = 75
+    this.width = 100
+    this.height = 100
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 301) + 50;
 }
@@ -136,12 +139,17 @@ var Gem = function(x, y) {
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
-    Gem.prototype.reset = function() {
-        gem.x = Math.floor(Math.random() * 301) + 100;
-        gem.y = Math.floor(Math.random() * 301) + 50;
-    };
-
 };
+Gem.prototype.update = function() {
+    gem.x = Math.floor(Math.random() * 301) + 100;
+    gem.y = Math.floor(Math.random() * 301) + 50;
+};
+Player.prototype.displayGemScore = function() {
+    ctx.clearRect(200, 25, 100, 50);
+    ctx.font = '18px Sans Serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText('Gems: ' + player.gemScore, 200, 25);
+}
 
 Player.prototype.checkGemCollisions = function() {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -154,7 +162,8 @@ Player.prototype.checkGemCollisions = function() {
         player.gemScore = player.gemScore + 1; {
             console.log("You have " + player.gemScore + "gems!")
         };
-        setTimeout(gem.reset(), 1500)
+        player.displayGemScore();
+        setTimeout(gem.update(), 1500)
     }
 };
 
@@ -185,3 +194,11 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+var gameReset = function() {
+    ctx.fillStyle = 'green';
+    ctx.fillRect = (0, 0, 700, 700);
+    ctx.font = 'bold 36pt Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeText = ('Game Over!', 250, 250);
+}
