@@ -124,26 +124,6 @@ Player.prototype.handleInput = function(allowedKeys) {
     }
 
 };
-
-Player.prototype.checkGemCollisions = function() {
-
-
-    //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-    var gemReset = function() {
-        gem.x = Math.floor(Math.random() * 301) + 100;
-        gem.y = Math.floor(Math.random() * 301) + 50;
-    };
-    if (gem.x < this.x + this.width &&
-        gem.x + gem.width > this.x &&
-        gem.y < this.y + this.height &&
-        gem.height + gem.y > this.y) {
-        player.y = 10;
-        player.gemScore = player.gemScore + 1; {
-            console.log("You have " + player.gemScore + "gems!")
-        };
-        setTimeout(gemReset, 1500)
-    }
-};
 var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
 var Gem = function(x, y) {
     this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)]
@@ -156,8 +136,28 @@ var Gem = function(x, y) {
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
+    Gem.prototype.reset = function() {
+        gem.x = Math.floor(Math.random() * 301) + 100;
+        gem.y = Math.floor(Math.random() * 301) + 50;
+    };
 
 };
+
+Player.prototype.checkGemCollisions = function() {
+    //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+
+    if (gem.x < this.x + this.width &&
+        gem.x + gem.width > this.x &&
+        gem.y < this.y + this.height &&
+        gem.height + gem.y > this.y) {
+        player.y = 10;
+        player.gemScore = player.gemScore + 1; {
+            console.log("You have " + player.gemScore + "gems!")
+        };
+        setTimeout(gem.reset(), 1500)
+    }
+};
+
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
