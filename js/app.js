@@ -13,8 +13,8 @@ var Enemy = function(x, y, speed) {
     this.x = Math.floor(Math.random() * 11) + 15;
     this.y = Math.floor(Math.random() * 251) + 50;
     this.speed = Math.floor(Math.random() * 151) + 50;
+    this.canMove = true;
 };
-
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
@@ -32,6 +32,7 @@ Enemy.prototype.update = function(dt) {
     this.checkCollisions();
 };
 
+
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -40,34 +41,36 @@ Enemy.prototype.render = function() {
 };
 Enemy.prototype.checkCollisions = function() {
 
-
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
 
     if (player.x < this.x + this.width &&
         player.x + player.width > this.x &&
         player.y < this.y + this.height &&
         player.height + player.y > this.y) {
+
         console.log("collision detected!");
         player.x = 225;
         player.y = 400;
+        rock.update();
         player.lives = player.lives - 1;
         player.displayLifeScore();
-        if (player.lives == 0) {
-            ctx.clearRect(25, 25, 600, 50);
-            ctx.fillStyle = 'red'
-            ctx.font = 'bold 20px Sans Serif';
-            ctx.textBaseline = 'top'
-            ctx.textAlign = 'center'
-            ctx.fillText('Game over!', 200, 25);
-            player.x = 225;
-            player.y = 400;
-            gameReset();
+        //player.displayGemScore();
 
+    } else if (player.lives == 0 || player.lives < 0) {
+        for (i = 0; i < allEnemies.length; i++) {
+            allEnemies[i].x = -400;
+            allEnemies[i].y = -400;
+            allEnemies[i].move = false;
         }
+        ctx.clearRect(25, 25, 600, 50);
+        ctx.fillStyle = 'red'
+        ctx.font = 'bold 20px Sans Serif';
+        ctx.textBaseline = 'top'
+        ctx.textAlign = 'center'
+        ctx.fillText('Game over! Refresh the window to play again', 225, 25);
     }
+
 };
-
-
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -98,23 +101,29 @@ Player.prototype.update = function(dt) {
         this.y = 400;
         player.lives = player.lives + 1;
         player.displayLifeScore();
-
+        player.displayGemScore();
     }
     this.checkGemCollisions();
-
+    this.checkRockCollisions();
 };
+
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
-
 };
 
 Player.prototype.displayLifeScore = function() {
-    ctx.clearRect(25, 25, 100, 50);
-    ctx.font = '18px Sans Serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText('Lives: ' + player.lives, 25, 25);
+    if (player.lives > 0) {
+        ctx.clearRect(25, 25, 100, 50);
+        ctx.font = '18px Sans Serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Lives: ' + player.lives, 25, 25);
+    } //the next part tells it to simply draw a blank rectangle if the lives are 0 or less.  
+    else if (player.lives < 1) {
+        ctx.clearRect(25, 25, 100, 50);
+    }
 };
+
 Player.prototype.handleInput = function(allowedKeys) {
     if (allowedKeys == 'left') {
         this.x -= 20;
@@ -125,13 +134,14 @@ Player.prototype.handleInput = function(allowedKeys) {
     } else {
         this.y += 20;
     }
-
 };
+
 var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
+
 var Gem = function(x, y) {
-    this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)]
-    this.width = 100
-    this.height = 100
+    this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+    this.width = 100;
+    this.height = 100;
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 301) + 50;
 }
@@ -140,10 +150,13 @@ Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
 };
+
 Gem.prototype.update = function() {
+
     gem.x = Math.floor(Math.random() * 301) + 100;
     gem.y = Math.floor(Math.random() * 301) + 50;
 };
+
 Player.prototype.displayGemScore = function() {
     ctx.clearRect(200, 25, 100, 50);
     ctx.font = '18px Sans Serif';
@@ -162,11 +175,50 @@ Player.prototype.checkGemCollisions = function() {
         player.gemScore = player.gemScore + 1; {
             console.log("You have " + player.gemScore + "gems!")
         };
+        //this displays the number of gems
         player.displayGemScore();
-        setTimeout(gem.update(), 1500)
+        //this moves the gem to a new location
+        setTimeout(gem.update(), 5000)
     }
 };
 
+var Rock = function(x, y) {
+    this.sprite = 'images/rock.png';
+    this.width = 100;
+    this.height = 100;
+    this.x = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 301) + 50;
+}
+
+Rock.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite),
+        this.x, this.y);
+};
+
+Rock.prototype.update = function() {
+    rock.x = Math.floor(Math.random() * 301) + 100;
+    rock.y = Math.floor(Math.random() * 301) + 50;
+};
+
+Player.prototype.checkRockCollisions = function() {
+    if (rock.x < this.x + this.width &&
+        rock.x + rock.width > this.x &&
+        rock.y < this.y + this.height &&
+        rock.height + rock.y > this.y) {
+        player.y = rock.y - 50;
+        player.x = rock.x - 50;
+        player.lives = player.lives - 1; {
+            console.log("You hit a rock!")
+
+        };
+        //this displays the number of gems
+        player.displayLifeScore();
+        //this moves the gem to a new location
+        setTimeout(rock.update(), 5000)
+
+
+    }
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -178,8 +230,9 @@ var bug3 = new Enemy();
 
 var allEnemies = [bug1, bug2, bug3];
 
-var player = new Player(200, 400, 10);
+var player = new Player(225, 400, 10);
 var gem = new Gem();
+var rock = new Rock();
 
 
 // This listens for key presses and sends the keys to your
@@ -191,14 +244,5 @@ document.addEventListener('keyup', function(e) {
         39: 'right',
         40: 'down'
     };
-
     player.handleInput(allowedKeys[e.keyCode]);
 });
-
-var gameReset = function() {
-    ctx.fillStyle = 'green';
-    ctx.fillRect = (0, 0, 700, 700);
-    ctx.font = 'bold 36pt Arial';
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeText = ('Game Over!', 250, 250);
-}
