@@ -1,18 +1,26 @@
+//a method to draw a bounding box around the characters to fine tune the game play: courtesy of Karol https://discussions.udacity.com/t/how-to-pause-the-game/190398/7
+function drawBox(x, y, width, height, color) {
+    ctx.beginPath();
+    ctx.rect(x, y + 71, width, height);
+    ctx.lineWidth = 2
+    ctx.strokeStyle = color;
+    ctx.stroke();
+}
+
 // Enemies our player must avoid
 var Enemy = function(x, y, speed) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     //thanks to Karol's note at https://discussions.udacity.com/t/bugs-and-player-collision-is-occurring-too-early/242650/4 about reducing the width and height for Enemy and Player to make collisions occur when they are nearer to each other.
     this.sprite = 'images/enemy-bug.png';
-    this.width = 80; //setting a working width for now
-    this.height = 65; //setting a working height for now
+    this.width = 100; //setting a working width for now
+    this.height = 75; //setting a working height for now
     //set random initial x & y coordinates for each enemy;
     this.x = Math.floor(Math.random() * 11) + 15;
-    this.y = Math.floor(Math.random() * 251) + 50;
+    this.y = Math.floor(Math.random() * 236) + 25;
     this.speed = Math.floor(Math.random() * 151) + 50;
+    //the following allows the enemies to be unable to move under certain conditions courtesy of a hint from https://discussions.udacity.com/t/stopping-enemy-movement/241905
     this.canMove = true;
 };
 // Update the enemy's position, required method for game
@@ -29,15 +37,14 @@ Enemy.prototype.update = function(dt) {
         this.speed = Math.floor(Math.random() * 151) + 50;
     }
     //calls the checkCollisions function.
-    this.checkCollisions();
+    this.checkCollisions()
 };
 
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
-
+    drawBox(this.x, this.y, 100, 75, 'yellow');
 };
 Enemy.prototype.checkCollisions = function() {
 
@@ -51,36 +58,34 @@ Enemy.prototype.checkCollisions = function() {
         console.log("collision detected!");
         player.x = 225;
         player.y = 400;
-        rock.update();
+        //collide with a bug and the rocks move around too
+        for (i = 0; i < allRocks.length; i++) {
+            allRocks[i].update();
+        };
+        //plus you lose player lives
         player.lives = player.lives - 1;
         player.displayLifeScore();
         //player.displayGemScore();
 
     } else if (player.lives == 0 || player.lives < 0) {
-        for (i = 0; i < allEnemies.length; i++) {
-            allEnemies[i].x = -400;
-            allEnemies[i].y = -400;
-            allEnemies[i].move = false;
-        }
-        ctx.clearRect(25, 25, 600, 50);
-        ctx.fillStyle = 'red'
-        ctx.font = 'bold 20px Sans Serif';
-        ctx.textBaseline = 'top'
-        ctx.textAlign = 'center'
-        ctx.fillText('Game over! Refresh the window to play again', 225, 25);
+        player.gameLose();
     }
-
 };
+
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function(x, y, lives) {
+var Player = function(x, y, lives, movement) {
     this.sprite = 'images/char-boy.png';
-    this.width = 50; //setting a working width
-    this.height = 50; //setting a working height
+    this.width = 100; //setting a working width
+    this.height = 85; //setting a working height
+    //setting the initial location on the gameboard
     this.x = x;
     this.y = y;
+    //this sets the amount the player will move in any direction when a key is pressed
+    this.movement = movement;
+    //this sets the player's initial number of "lives".
     this.lives = lives;
     this.gemScore = 0;
 };
@@ -96,73 +101,98 @@ Player.prototype.update = function(dt) {
     if (this.y > 425) {
         this.y = 400;
     }
-    if (this.y < -15) {
+    //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore
+    if (this.y < -10) {
         this.x = 225;
         this.y = 400;
         player.lives = player.lives + 1;
-        player.displayLifeScore();
-        player.displayGemScore();
+        gem.update();
     }
+    //if the player gets 15 lives or 10 gems, they win the game. 
+    if (player.lives == 15 || player.gemScore == 10) {
+        this.gameWin();
+    }
+
     this.checkGemCollisions();
+
     this.checkRockCollisions();
+    this.displayLifeScore();
+    this.displayGemScore();
 };
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
+    drawBox(this.x, this.y, 65, 85, 'blue');
 };
-
+//this displays the player's life score if it is above 0
 Player.prototype.displayLifeScore = function() {
-    if (player.lives > 0) {
+    if (player.lives > 0 && player.lives < 25) {
         ctx.clearRect(25, 25, 100, 50);
         ctx.font = '18px Sans Serif';
         ctx.textBaseline = 'top';
         ctx.fillText('Lives: ' + player.lives, 25, 25);
-    } //the next part tells it to simply draw a blank rectangle if the lives are 0 or less.  
-    else if (player.lives < 1) {
+    } //the next part tells it to simply draw a blank rectangle if the lives are 0 or less, or if the player has enough lives to win
+    else if (player.lives < 1 || player.lives == 15) {
         ctx.clearRect(25, 25, 100, 50);
     }
+
 };
+
+Player.prototype.gameLose = function() {
+    for (i = 0; i < allEnemies.length; i++) {
+        //this moves the enemies off screen to end the game;
+        allEnemies[i].x = -400;
+        allEnemies[i].y = -400;
+        allEnemies[i].move = false;
+    }
+    ctx.clearRect(25, 25, 600, 50);
+    ctx.fillStyle = 'red'
+    ctx.font = 'bold 20px Sans Serif';
+    ctx.textBaseline = 'top'
+    ctx.textAlign = 'center'
+    ctx.fillText('Game over! Refresh the window to play again', 225, 25);
+}
+
+Player.prototype.gameWin = function() {
+
+    {
+        for (i = 0; i < allEnemies.length; i++) {
+            //this moves the enemies off screen to end the game;
+            allEnemies[i].x = -400;
+            allEnemies[i].y = -400;
+            allEnemies[i].move = false;
+        }
+        ctx.clearRect(25, 25, 600, 50);
+        ctx.fillStyle = 'green'
+        ctx.font = 'bold 20px Sans Serif';
+        ctx.textBaseline = 'top'
+        ctx.textAlign = 'center'
+        ctx.fillText('You won! Refresh the window to play again', 225, 25);
+    }
+}
 
 Player.prototype.handleInput = function(allowedKeys) {
     if (allowedKeys == 'left') {
-        this.x -= 20;
+        this.x -= this.movement;
     } else if (allowedKeys == 'right') {
-        this.x += 20;
+        this.x += this.movement;
     } else if (allowedKeys == 'up') {
-        this.y -= 20;
+        this.y -= this.movement;
     } else {
-        this.y += 20;
+        this.y += this.movement;
+    }
+};
+Player.prototype.displayGemScore = function() {
+    if (player.gemScore < 10) {
+        ctx.clearRect(200, 25, 100, 50);
+        ctx.font = '18px Sans Serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Gems: ' + player.gemScore, 200, 25);
+
     }
 };
 
-var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
-
-var Gem = function(x, y) {
-    this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)];
-    this.width = 100;
-    this.height = 100;
-    this.x = Math.floor(Math.random() * 301) + 100;
-    this.y = Math.floor(Math.random() * 301) + 50;
-}
-
-Gem.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite),
-        this.x, this.y);
-};
-
-Gem.prototype.update = function() {
-
-    gem.x = Math.floor(Math.random() * 301) + 100;
-    gem.y = Math.floor(Math.random() * 301) + 50;
-};
-
-Player.prototype.displayGemScore = function() {
-    ctx.clearRect(200, 25, 100, 50);
-    ctx.font = '18px Sans Serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText('Gems: ' + player.gemScore, 200, 25);
-}
 
 Player.prototype.checkGemCollisions = function() {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -182,43 +212,77 @@ Player.prototype.checkGemCollisions = function() {
     }
 };
 
+Player.prototype.checkRockCollisions = function() {
+    for (i = 0; i < allRocks.length; i++) {
+        if (allRocks[i].x < this.x + this.width &&
+            allRocks[i].x + allRocks[i].width > this.x &&
+            allRocks[i].y < this.y + this.height &&
+            allRocks[i].height + allRocks[i].y > this.y) {
+            //this moves the player away from the rock to prevent life points being "drained" by staying near the rock.
+            player.y = player.y + (Math.floor(Math.random() * 26) + 25);
+            player.x = player.x + (Math.floor(Math.random() * 26) + 25);
+            //player.y = 400;
+            player.lives = player.lives - 1; {
+                console.log("You hit a rock!")
+            };
+            player.displayLifeScore();
+            //this moves the rock to a new location
+            setTimeout(allRocks[i].update(), 5000)
+
+
+        }
+    }
+};
+
+var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
+
+var Gem = function(x, y) {
+    this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+    //thanks to Karol's comment on resizing the gems here: https://discussions.udacity.com/t/change-size-of-gem-image/189661
+    this.width = 65;
+    this.height = 100;
+    this.x = Math.floor(Math.random() * 426) + 25;
+    this.y = Math.floor(Math.random() * 251) + 100;
+}
+
+Gem.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite),
+        this.x, this.y, this.width, this.height);
+    drawBox(this.x, this.y, 65, 100, 'red');
+};
+
+Gem.prototype.update = function() {
+
+    gem.x = Math.floor(Math.random() * 301) + 100;
+    gem.y = Math.floor(Math.random() * 301) + 50;
+};
+
+//this displays the players Gem count or score
+
+//this sets up rocks to randomly trip over. 
 var Rock = function(x, y) {
     this.sprite = 'images/rock.png';
     this.width = 100;
     this.height = 100;
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 301) + 50;
-}
 
-Rock.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite),
-        this.x, this.y);
 };
 
 Rock.prototype.update = function() {
-    rock.x = Math.floor(Math.random() * 301) + 100;
-    rock.y = Math.floor(Math.random() * 301) + 50;
+    this.x = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 301) + 50;
+
+
+};
+Rock.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite),
+        this.x, this.y);
+    drawBox(this.x, this.y, 100, 100, 'green');
+    //this.width, this.height);
 };
 
-Player.prototype.checkRockCollisions = function() {
-    if (rock.x < this.x + this.width &&
-        rock.x + rock.width > this.x &&
-        rock.y < this.y + this.height &&
-        rock.height + rock.y > this.y) {
-        player.y = rock.y - 50;
-        player.x = rock.x - 50;
-        player.lives = player.lives - 1; {
-            console.log("You hit a rock!")
 
-        };
-        //this displays the number of gems
-        player.displayLifeScore();
-        //this moves the gem to a new location
-        setTimeout(rock.update(), 5000)
-
-
-    }
-};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -230,9 +294,13 @@ var bug3 = new Enemy();
 
 var allEnemies = [bug1, bug2, bug3];
 
-var player = new Player(225, 400, 10);
+//this sets the player with a given initial location, life number, and movement amount
+var player = new Player(225, 400, 10, 25);
 var gem = new Gem();
-var rock = new Rock();
+var rock1 = new Rock();
+var rock2 = new Rock();
+
+var allRocks = [rock1, rock2];
 
 
 // This listens for key presses and sends the keys to your

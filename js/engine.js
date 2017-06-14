@@ -96,7 +96,7 @@ var Engine = (function(global) {
         });
         player.update();
         //gem.update();
-        //rock.update();
+        //rock.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -155,7 +155,9 @@ var Engine = (function(global) {
 
         player.render();
         gem.render();
-        rock.render();
+        allRocks.forEach(function(rock) {
+            rock.render();
+        });
     }
 
     /* This function does nothing but it could have been a good place to
