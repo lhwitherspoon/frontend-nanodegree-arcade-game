@@ -1,7 +1,8 @@
 //a method to draw a bounding box around the characters to fine tune the game play: courtesy of Karol https://discussions.udacity.com/t/how-to-pause-the-game/190398/7
 function drawBox(x, y, width, height, color) {
     ctx.beginPath();
-    ctx.rect(x, y + 71, width, height);
+
+    ctx.rect(x, y, width, height);
     ctx.lineWidth = 2
     ctx.strokeStyle = color;
     ctx.stroke();
@@ -21,7 +22,7 @@ var Enemy = function(x, y, speed) {
     this.y = Math.floor(Math.random() * 236) + 25;
     this.speed = Math.floor(Math.random() * 151) + 50;
     //the following allows the enemies to be unable to move under certain conditions courtesy of a hint from https://discussions.udacity.com/t/stopping-enemy-movement/241905
-    this.canMove = true;
+    this.canMove = false;
 };
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -52,8 +53,8 @@ Enemy.prototype.checkCollisions = function() {
 
     if (player.x < this.x + this.width &&
         player.x + player.width > this.x &&
-        player.y < this.y + this.height &&
-        player.height + player.y > this.y) {
+        (player.y) < this.y + this.height &&
+        (player.height) + player.y > this.y) {
 
         console.log("collision detected!");
         player.x = 225;
@@ -78,11 +79,11 @@ Enemy.prototype.checkCollisions = function() {
 // a handleInput() method.
 var Player = function(x, y, lives, movement) {
     this.sprite = 'images/char-boy.png';
-    this.width = 100; //setting a working width
+    this.width = 90; //setting a working width
     this.height = 85; //setting a working height
     //setting the initial location on the gameboard
     this.x = x;
-    this.y = y;
+    this.y = y + 5;
     //this sets the amount the player will move in any direction when a key is pressed
     this.movement = movement;
     //this sets the player's initial number of "lives".
@@ -123,7 +124,7 @@ Player.prototype.update = function(dt) {
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
-    drawBox(this.x, this.y, 65, 85, 'blue');
+    drawBox(this.x, this.y, 90, 85, 'blue');
 };
 //this displays the player's life score if it is above 0
 Player.prototype.displayLifeScore = function() {
@@ -240,7 +241,7 @@ var Gem = function(x, y) {
     this.sprite = gemTypes[Math.floor(Math.random() * gemTypes.length)];
     //thanks to Karol's comment on resizing the gems here: https://discussions.udacity.com/t/change-size-of-gem-image/189661
     this.width = 65;
-    this.height = 100;
+    this.height = 75;
     this.x = Math.floor(Math.random() * 426) + 25;
     this.y = Math.floor(Math.random() * 251) + 100;
 }
@@ -248,7 +249,7 @@ var Gem = function(x, y) {
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y, this.width, this.height);
-    drawBox(this.x, this.y, 65, 100, 'red');
+    drawBox(this.x, this.y, 65, 75, 'red');
 };
 
 Gem.prototype.update = function() {
@@ -295,7 +296,7 @@ var bug3 = new Enemy();
 var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
-var player = new Player(225, 400, 10, 25);
+var player = new Player(225, 400, 10, 5);
 var gem = new Gem();
 var rock1 = new Rock();
 var rock2 = new Rock();
