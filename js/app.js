@@ -19,7 +19,7 @@ var Enemy = function(x, y, speed) {
     this.height = 75; //setting a working height for now
     //set random initial x & y coordinates for each enemy;
     this.x = Math.floor(Math.random() * 11) + 15;
-    this.y = Math.floor(Math.random() * 236) + 25;
+    this.y = Math.floor(Math.random() * 201) + 100;
     this.speed = Math.floor(Math.random() * 151) + 50;
     //the following allows the enemies to be unable to move under certain conditions courtesy of a hint from https://discussions.udacity.com/t/stopping-enemy-movement/241905
     this.canMove = false;
@@ -83,7 +83,7 @@ var Player = function(x, y, lives, movement) {
     this.height = 85; //setting a working height
     //setting the initial location on the gameboard
     this.x = x;
-    this.y = y + 5;
+    this.y = y;
     //this sets the amount the player will move in any direction when a key is pressed
     this.movement = movement;
     //this sets the player's initial number of "lives".
@@ -93,21 +93,22 @@ var Player = function(x, y, lives, movement) {
 
 Player.prototype.update = function(dt) {
     //this.handleInput();
-    if (this.x > 450) {
-        this.x = 425;
+    if (this.x > 425) {
+        this.x = 400;
     }
     if (this.x < -15) {
         this.x = 15;
     }
-    if (this.y > 425) {
-        this.y = 400;
+    if (this.y > 455) {
+        this.y = 425;
     }
-    //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore
-    if (this.y < -10) {
+    //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore;
+    if (this.y < 50) {
         this.x = 225;
         this.y = 400;
         player.lives = player.lives + 1;
-        gem.update();
+        this.displayLifeScore();
+
     }
     //if the player gets 15 lives or 10 gems, they win the game. 
     if (player.lives == 15 || player.gemScore == 10) {
@@ -117,8 +118,8 @@ Player.prototype.update = function(dt) {
     this.checkGemCollisions();
 
     this.checkRockCollisions();
-    this.displayLifeScore();
-    this.displayGemScore();
+    // this.displayLifeScore();
+    // this.displayGemScore();
 };
 
 Player.prototype.render = function() {
@@ -202,7 +203,7 @@ Player.prototype.checkGemCollisions = function() {
         gem.x + gem.width > this.x &&
         gem.y < this.y + this.height &&
         gem.height + gem.y > this.y) {
-        player.y = 10;
+        player.y = 50;
         player.gemScore = player.gemScore + 1; {
             console.log("You have " + player.gemScore + "gems!")
         };
@@ -242,8 +243,8 @@ var Gem = function(x, y) {
     //thanks to Karol's comment on resizing the gems here: https://discussions.udacity.com/t/change-size-of-gem-image/189661
     this.width = 65;
     this.height = 75;
-    this.x = Math.floor(Math.random() * 426) + 25;
-    this.y = Math.floor(Math.random() * 251) + 100;
+    this.x = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 301) + 100;
 }
 
 Gem.prototype.render = function() {
@@ -255,7 +256,7 @@ Gem.prototype.render = function() {
 Gem.prototype.update = function() {
 
     gem.x = Math.floor(Math.random() * 301) + 100;
-    gem.y = Math.floor(Math.random() * 301) + 50;
+    gem.y = Math.floor(Math.random() * 301) + 100;
 };
 
 //this displays the players Gem count or score
@@ -266,13 +267,13 @@ var Rock = function(x, y) {
     this.width = 100;
     this.height = 100;
     this.x = Math.floor(Math.random() * 301) + 100;
-    this.y = Math.floor(Math.random() * 301) + 50;
+    this.y = Math.floor(Math.random() * 276) + 100;
 
 };
 
 Rock.prototype.update = function() {
     this.x = Math.floor(Math.random() * 301) + 100;
-    this.y = Math.floor(Math.random() * 301) + 50;
+    this.y = Math.floor(Math.random() * 276) + 100;
 
 
 };
@@ -296,7 +297,7 @@ var bug3 = new Enemy();
 var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
-var player = new Player(225, 400, 10, 5);
+var player = new Player(225, 400, 10, 30);
 var gem = new Gem();
 var rock1 = new Rock();
 var rock2 = new Rock();
