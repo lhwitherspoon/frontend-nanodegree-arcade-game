@@ -7,6 +7,9 @@ function drawBox(x, y, width, height, color) {
     ctx.strokeStyle = color;
     ctx.stroke();
 }
+//TODO: set up player.gemScore to display at start of game; 
+//TODO: set up player.lifeScore to display at start of  game/
+//TODO: Determine why 
 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed) {
@@ -105,7 +108,7 @@ Player.prototype.update = function(dt) {
     //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore;
     if (this.y < 50) {
         this.x = 225;
-        this.y = 400;
+        this.y = 435;
         player.lives = player.lives + 1;
         this.displayLifeScore();
 
@@ -297,7 +300,7 @@ var bug3 = new Enemy();
 var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
-var player = new Player(225, 400, 10, 30);
+var player = new Player(225, 435, 10, 20);
 var gem = new Gem();
 var rock1 = new Rock();
 var rock2 = new Rock();
