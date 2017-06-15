@@ -1,4 +1,16 @@
-//a method to draw a bounding box around the characters to fine tune the game play: courtesy of Karol https://discussions.udacity.com/t/how-to-pause-the-game/190398/7
+//Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
+//The engine.js, resources.js, index.html, and style.css files were provided by Udacity. Portions of the code below were provided as "starter" code in the original file, viewable at appOld.js.
+//Forum posts and online sites that provided information helpful in resolving questions of how to generally implement certain techniques have been documented throughout the code. In addition the following provided general guidance: 
+//https://discussions.udacity.com/t/classic-arcade-game-problem-getting-started/244322/4 which describes how to get started; also https://discussions.udacity.com/t/no-idea-whatsoever/197493/23.
+//https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Build_the_brick_field
+//https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random (MDN in general)
+//https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Math/floor
+//https://www.w3schools.com/graphics/game_intro.asp
+
+
+
+//This is a method to draw a bounding box around the characters to fine tune the game play: courtesy of Karol https://discussions.udacity.com/t/how-to-pause-the-game/190398/7
 function drawBox(x, y, width, height, color) {
     ctx.beginPath();
 
@@ -9,17 +21,17 @@ function drawBox(x, y, width, height, color) {
 }
 //TODO: set up player.gemScore to display at start of game; 
 //TODO: set up player.lifeScore to display at start of  game/
-//thanks to https://discussions.udacity.com/t/classic-arcade-game-problem-getting-started/244322/4 which describes how to get started; alsohttps://discussions.udacity.com/t/no-idea-whatsoever/197493/23.
-//images were cropped to eliminate "extra" transparency on the top of the images, that was leading to offsets and difficulty in fine-tuning collisions. 
+
+//The images were cropped to eliminate "extra" transparency on the top of the images, that was leading to offsets and difficulty in fine-tuning collisions. 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed) {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    //thanks to Karol's note at https://discussions.udacity.com/t/bugs-and-player-collision-is-occurring-too-early/242650/4 about reducing the width and height for Enemy and Player to make collisions occur when they are nearer to each other.
+    //Thanks to Karol's note at https://discussions.udacity.com/t/bugs-and-player-collision-is-occurring-too-early/242650/4 about reducing the width and height for Enemy and Player to make collisions occur when they are nearer to each other.
     this.sprite = 'images/enemy-bug.png';
     this.width = 90; //setting a working width for now
     this.height = 65; //setting a working height for now
-    //set random initial x & y coordinates and speed for each enemy; thanks to https://www.kirupa.com/html5/random_numbers_js.htm for the explanation 
+    //Set random initial x & y coordinates and speed for each enemy; thanks to https://www.kirupa.com/html5/random_numbers_js.htm for the explanation of how this works.
     this.x = Math.floor(Math.random() * 11) + 15;
     this.y = Math.floor(Math.random() * 201) + 100;
     this.speed = Math.floor(Math.random() * 101) + 50;
@@ -87,6 +99,28 @@ var Player = function(x, y, lives, movement) {
     //this sets the player's initial number of "lives".
     this.lives = lives;
     this.gemScore = 0;
+};
+//this.movement is set in the player instantiation. It is the amount the player will move when the key is pressed. https://www.w3schools.com/graphics/game_controllers.asp, https://developer.mozilla.org/en-US/docs/Games/Techniques/Control_mechanisms/Desktop_with_mouse_and_keyboard,https://discussions.udacity.com/t/arcade-game-question/246212/70 (helpful on many aspects) and https://discussions.udacity.com/t/how-do-i-make-the-handleinput-listen-the-keys/162024  plus
+//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch for overall understanding of how this worked.
+Player.prototype.handleInput = function(allowedKeys) {
+    switch (allowedKeys) {
+        case 'left':
+            this.x -= this.movement;
+            break;
+        case 'right':
+            this.x += this.movement;
+            break;
+        case 'up':
+            this.y -= this.movement;
+            break;
+        case 'down':
+            this.y += this.movement;
+            break;
+        default:
+            this.x = this.x;
+            this.y = this.y;
+            break;
+    }
 };
 
 Player.prototype.update = function(dt) {
@@ -184,18 +218,8 @@ Player.prototype.gameWin = function() {
         ctx.fillText('You won! Refresh the window to play again', 225, 25);
     }
 };
-//this.movement is set in the player instantiation. It is the amount the player will move when the key is pressed. https://www.w3schools.com/graphics/game_controllers.asp, https://discussions.udacity.com/t/arcade-game-question/246212/70 and https://discussions.udacity.com/t/how-do-i-make-the-handleinput-listen-the-keys/162024  were helpful in understanding how this worked. 
-Player.prototype.handleInput = function(allowedKeys) {
-    if (allowedKeys == 'left') {
-        this.x -= this.movement;
-    } else if (allowedKeys == 'right') {
-        this.x += this.movement;
-    } else if (allowedKeys == 'up') {
-        this.y -= this.movement;
-    } else if (allowedKeys == 'down') {
-        this.y += this.movement;
-    }
-};
+
+
 
 Player.prototype.checkGemCollisions = function() {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -292,12 +316,13 @@ var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
 var player = new Player(225, 435, 10, 40);
+
 var gem = new Gem();
+
 var rock1 = new Rock();
 var rock2 = new Rock();
 
 var allRocks = [rock1, rock2];
-
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
