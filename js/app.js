@@ -1,4 +1,3 @@
-
 'use strict'; //Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
  //Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
 //The engine.js, resources.js, index.html, and style.css files were provided by Udacity. Portions of the code below were provided as "starter" code in the original file, viewable at appOld.js.
