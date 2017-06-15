@@ -25,7 +25,7 @@ This is a somewhat modified game of Frogger. The player must cross a paved path 
 ### Still a work in progress:
 
 * permanently pausing enemy movement after a game is lost/won, until it is reset;
-* Player can still pick up gems after a game is won or lost (score will be console logged, but not displayed);
+* Player can still pick up gems after a game is won or lost (score will be console logged, but not displayed); if so additional scores may show up on the game board, overlapping the won/lost message.
 * further finetuning of collisions.
 
 
