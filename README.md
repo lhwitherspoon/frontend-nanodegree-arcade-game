@@ -22,4 +22,10 @@ This is a somewhat modified game of Frogger. The player must cross a paved path 
 * At this time, the distance the player moves is set by the code and does not vary. The speed of the bugs is randomly set. 
 * To "collect" a gem, move until you collide with it.
 
+### Still a work in progress:
+
+* permanently pausing enemy movement after a game is lost/won, until it is reset;
+* Player can still pick up gems after a game is won or lost (score will be console logged, but not displayed);
+* further finetuning of collisions.
+
 

@@ -64,8 +64,8 @@ Enemy.prototype.checkCollisions = function() {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
     if (player.x < this.x + this.width &&
         player.x + player.width > this.x &&
-        (player.y) < this.y + this.height &&
-        (player.height) + player.y > this.y) {
+        player.y < this.y + this.height &&
+        (player.height - 5) + player.y > this.y) {
 
         console.log("collision detected!");
         player.x = 225;
@@ -75,7 +75,9 @@ Enemy.prototype.checkCollisions = function() {
             allRocks[i].update();
         }
         //plus a life point is deducted
-        player.lives = player.lives - 1;
+        player.lives = player.lives - 1; {
+            console.log("Lives: " + player.lives);
+        }
         player.displayLifeScore();
         //player.displayGemScore();
 
@@ -169,7 +171,9 @@ Player.prototype.resetWater = function() {
     if (this.y < 35) {
         this.x = 225;
         this.y = 435;
-        player.lives = player.lives + 1;
+        player.lives = player.lives + 1; {
+            console.log("Lives: " + player.lives);
+        }
         this.displayLifeScore();
     }
 };
@@ -226,10 +230,12 @@ Player.prototype.checkGemCollisions = function() {
 
     if (gem.x < this.x + this.width &&
         gem.x + gem.width > this.x &&
-        gem.y < this.y + this.height &&
+        gem.y < this.y + (this.height - 5) &&
         gem.height + gem.y > this.y) {
-        player.y = 50;
-        player.lives = player.lives + 1;
+        player.y = 45;
+        player.lives = player.lives + 1; {
+            console.log("Lives: " + player.lives);
+        }
         player.gemScore = player.gemScore + 1; {
             console.log("You have " + player.gemScore + "gems!");
         }
@@ -244,14 +250,14 @@ Player.prototype.checkRockCollisions = function() {
     for (i = 0; i < allRocks.length; i++) {
         if (allRocks[i].x < this.x + this.width &&
             allRocks[i].x + allRocks[i].width > this.x &&
-            allRocks[i].y < this.y + this.height &&
+            allRocks[i].y < this.y + (this.height - 5) &&
             allRocks[i].height + allRocks[i].y > this.y) {
             //this moves the player away from the rock to prevent life points being "drained" by staying near the rock.
             player.y = player.y + (Math.floor(Math.random() * 26) + 25);
             player.x = player.x + (Math.floor(Math.random() * 26) + 25);
             //player.y = 400;
             player.lives = player.lives - 1; {
-                console.log("You hit a rock!");
+                console.log("You hit a rock! You have " + player.lives + " lives.");
             }
             player.displayLifeScore();
             //this moves the rock to a new location
@@ -268,7 +274,7 @@ var Gem = function(x, y) {
     this.width = 65;
     this.height = 75;
     this.x = Math.floor(Math.random() * 301) + 100;
-    this.y = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 251) + 100;
 };
 
 Gem.prototype.render = function() {
@@ -280,7 +286,7 @@ Gem.prototype.render = function() {
 Gem.prototype.update = function() {
     //this resets the gem to a new location that is randomly chosen
     gem.x = Math.floor(Math.random() * 301) + 100;
-    gem.y = Math.floor(Math.random() * 301) + 100;
+    gem.y = Math.floor(Math.random() * 251) + 100;
 };
 
 //this sets up rocks to randomly trip over. 
