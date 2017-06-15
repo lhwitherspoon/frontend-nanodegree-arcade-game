@@ -1,4 +1,4 @@
-//Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
+'use strict'; //Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
 //The engine.js, resources.js, index.html, and style.css files were provided by Udacity. Portions of the code below were provided as "starter" code in the original file, viewable at appOld.js.
 //Forum posts and online sites that provided information helpful in resolving questions of how to generally implement certain techniques have been documented throughout the code. In addition the following provided general guidance: 
 //https://discussions.udacity.com/t/classic-arcade-game-problem-getting-started/244322/4 which describes how to get started; also https://discussions.udacity.com/t/no-idea-whatsoever/197493/23.
@@ -36,7 +36,6 @@ var Enemy = function(x, y, speed) {
     this.y = Math.floor(Math.random() * 201) + 100;
     this.speed = Math.floor(Math.random() * 101) + 50;
     //the following allows the enemies to be unable to move under certain conditions courtesy of a hint from https://discussions.udacity.com/t/stopping-enemy-movement/241905
-    this.canMove = true;
 };
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -60,7 +59,7 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     //drawBox(this.x, this.y, 100, 75, 'yellow');
 };
-Enemy.prototype.checkCollisions = function() {
+Enemy.prototype.checkCollisions = function(i) {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
     if (player.x < this.x + this.width &&
         player.x + player.width > this.x &&
@@ -129,7 +128,7 @@ Player.prototype.update = function(dt) {
     this.handleInput();
 
     //if the player gets 15 lives or 10 gems, they win the game. 
-    if (player.lives == 15 || player.gemScore == 10) {
+    if (this.lives == 15 || this.gemScore == 10) {
         this.gameWin();
     }
     this.resetSides();
@@ -148,21 +147,21 @@ Player.prototype.render = function() {
 };
 //this displays the player's life score if it is above 0
 Player.prototype.displayLifeScore = function() {
-    if (player.lives > 0 && player.lives < 15) {
-        ctx.clearRect(25, 25, 100, 50);
+    if (this.lives > 0 && this.lives < 15) {
+        ctx.clearRect(25, 25, 200, 50);
         ctx.font = '18px Sans Serif';
         ctx.textBaseline = 'top';
-        ctx.fillText('Lives: ' + player.lives, 25, 25);
+        ctx.fillText('Lives: ' + this.lives, 25, 25);
     }
 };
 
 //this displays the players gem count or score if the game has not ended
 Player.prototype.displayGemScore = function() {
-    if (player.gemScore < 10 && (player.lives > 0 && player.lives < 15)) {
-        ctx.clearRect(200, 25, 100, 50);
+    if (this.gemScore < 10 && (this.lives > 0 && this.lives < 15)) {
+        ctx.clearRect(200, 25, 400, 50);
         ctx.font = '18px Sans Serif';
         ctx.textBaseline = 'top';
-        ctx.fillText('Gems: ' + player.gemScore, 200, 25);
+        ctx.fillText('Gems: ' + this.gemScore, 200, 25);
     }
 };
 
@@ -171,8 +170,8 @@ Player.prototype.resetWater = function() {
     if (this.y < 35) {
         this.x = 225;
         this.y = 435;
-        player.lives = player.lives + 1; {
-            console.log("Lives: " + player.lives);
+        this.lives = this.lives + 1; {
+            console.log("Lives: " + this.lives);
         }
         this.displayLifeScore();
     }
@@ -191,36 +190,38 @@ Player.prototype.resetSides = function() {
     }
 };
 //this displays a message when the game is lost and clears the enemies off the screen
-Player.prototype.gameLose = function() {
+Player.prototype.gameLose = function(i) {
+
     for (i = 0; i < allEnemies.length; i++) {
         //this moves the enemies off screen to end the game;
-        allEnemies[i].x = -400;
-        allEnemies[i].y = -400;
-        allEnemies[i].move = false;
+        allEnemies[i].x = -1000;
+        allEnemies[i].y = -1000;
+        allEnemies[i].speed = 0;
     }
-    ctx.clearRect(25, 25, 600, 50);
+    ctx.clearRect(0, 0, 600, 50);
     ctx.fillStyle = 'red';
     ctx.font = 'bold 20px Sans Serif';
     ctx.textBaseline = 'top';
     ctx.textAlign = 'center';
     ctx.fillText('Game over! Refresh the window to play again', 225, 25);
+
 };
 //this displays a message when the game is won and clears the enemies off the screen
-Player.prototype.gameWin = function() {
-    {
-        for (i = 0; i < allEnemies.length; i++) {
-            //this moves the enemies off screen to end the game;
-            allEnemies[i].x = -400;
-            allEnemies[i].y = -400;
-            allEnemies[i].move = false;
-        }
-        ctx.clearRect(25, 25, 600, 50);
-        ctx.fillStyle = 'green';
-        ctx.font = 'bold 20px Sans Serif';
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'center';
-        ctx.fillText('You won! Refresh the window to play again', 225, 25);
+Player.prototype.gameWin = function(i) {
+
+    for (i = 0; i < allEnemies.length; i++) {
+        //this moves the enemies off screen to end the game;
+        allEnemies[i].x = -1000;
+        allEnemies[i].y = -1000;
+        allEnemies[i].speed = 0;
     }
+    ctx.clearRect(0, 0, 600, 50);
+    ctx.fillStyle = 'green';
+    ctx.font = 'bold 20px Sans Serif';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.fillText('You won! Refresh the window to play again', 225, 25);
+
 };
 
 
@@ -232,34 +233,34 @@ Player.prototype.checkGemCollisions = function() {
         gem.x + gem.width > this.x &&
         gem.y < this.y + (this.height - 5) &&
         gem.height + gem.y > this.y) {
-        player.y = 45;
-        player.lives = player.lives + 1; {
-            console.log("Lives: " + player.lives);
+        this.y = 45;
+        this.lives = this.lives + 1; {
+            console.log("Lives: " + this.lives);
         }
-        player.gemScore = player.gemScore + 1; {
-            console.log("You have " + player.gemScore + "gems!");
+        this.gemScore = this.gemScore + 1; {
+            console.log("You have " + this.gemScore + "gems!");
         }
         //this displays the number of gems
-        player.displayGemScore();
+        this.displayGemScore();
         //this moves the gem to a new location
         setTimeout(gem.update(), 5000);
     }
 };
 
-Player.prototype.checkRockCollisions = function() {
+Player.prototype.checkRockCollisions = function(i) {
     for (i = 0; i < allRocks.length; i++) {
         if (allRocks[i].x < this.x + this.width &&
             allRocks[i].x + allRocks[i].width > this.x &&
             allRocks[i].y < this.y + (this.height - 5) &&
             allRocks[i].height + allRocks[i].y > this.y) {
             //this moves the player away from the rock to prevent life points being "drained" by staying near the rock.
-            player.y = player.y + (Math.floor(Math.random() * 26) + 25);
-            player.x = player.x + (Math.floor(Math.random() * 26) + 25);
-            //player.y = 400;
-            player.lives = player.lives - 1; {
-                console.log("You hit a rock! You have " + player.lives + " lives.");
+            this.y = this.y + (Math.floor(Math.random() * 26) + 25);
+            this.x = this.x + (Math.floor(Math.random() * 26) + 25);
+            //this.y = 400;
+            this.lives = this.lives - 1; {
+                console.log("You hit a rock! You have " + this.lives + " lives.");
             }
-            player.displayLifeScore();
+            this.displayLifeScore();
             //this moves the rock to a new location
             setTimeout(allRocks[i].update(), 5000);
         }
@@ -285,8 +286,8 @@ Gem.prototype.render = function() {
 
 Gem.prototype.update = function() {
     //this resets the gem to a new location that is randomly chosen
-    gem.x = Math.floor(Math.random() * 301) + 100;
-    gem.y = Math.floor(Math.random() * 251) + 100;
+    this.x = Math.floor(Math.random() * 301) + 100;
+    this.y = Math.floor(Math.random() * 251) + 100;
 };
 
 //this sets up rocks to randomly trip over. 
@@ -320,7 +321,7 @@ var bug3 = new Enemy();
 
 var allEnemies = [bug1, bug2, bug3];
 
-//this sets the player with a given initial location, life number, and movement amount
+//this sets the player with a given initial location, life number, and movement amounthisplayer = new Player(225, 435, 10, 50);
 var player = new Player(225, 435, 10, 50);
 
 var gem = new Gem();
