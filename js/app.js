@@ -321,7 +321,7 @@ var bug3 = new Enemy();
 var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
-var player = new Player(225, 435, 10, 40);
+var player = new Player(225, 435, 10, 50);
 
 var gem = new Gem();
 
