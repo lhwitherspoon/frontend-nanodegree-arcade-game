@@ -1,8 +1,6 @@
-<<<<<<< HEAD
+
 'use strict'; //Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
-=======
  //Udacity FEND Arcade Game Clone Project, Spring 2017, Les Witherspoon, Seattle WA.
->>>>>>> ac6592b392b5c34ab846220120e54e3a7431bb73
 //The engine.js, resources.js, index.html, and style.css files were provided by Udacity. Portions of the code below were provided as "starter" code in the original file, viewable at appOld.js.
 //Forum posts and online sites that provided information helpful in resolving questions of how to generally implement certain techniques have been documented throughout the code. In addition the following provided general guidance: 
 //https://discussions.udacity.com/t/classic-arcade-game-problem-getting-started/244322/4 which describes how to get started; also https://discussions.udacity.com/t/no-idea-whatsoever/197493/23.
