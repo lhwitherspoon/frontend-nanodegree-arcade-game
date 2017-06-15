@@ -3,29 +3,28 @@ function drawBox(x, y, width, height, color) {
     ctx.beginPath();
 
     ctx.rect(x, y, width, height);
-    ctx.lineWidth = 2
+    ctx.lineWidth = 2;
     ctx.strokeStyle = color;
     ctx.stroke();
 }
 //TODO: set up player.gemScore to display at start of game; 
 //TODO: set up player.lifeScore to display at start of  game/
-//TODO: Determine why 
-
+//thanks to https://discussions.udacity.com/t/classic-arcade-game-problem-getting-started/244322/4 which describes how to get started; alsohttps://discussions.udacity.com/t/no-idea-whatsoever/197493/23.
+//images were cropped to eliminate "extra" transparency on the top of the images, that was leading to offsets and difficulty in fine-tuning collisions. 
 // Enemies our player must avoid
 var Enemy = function(x, y, speed) {
-
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     //thanks to Karol's note at https://discussions.udacity.com/t/bugs-and-player-collision-is-occurring-too-early/242650/4 about reducing the width and height for Enemy and Player to make collisions occur when they are nearer to each other.
     this.sprite = 'images/enemy-bug.png';
-    this.width = 100; //setting a working width for now
-    this.height = 75; //setting a working height for now
-    //set random initial x & y coordinates for each enemy;
+    this.width = 90; //setting a working width for now
+    this.height = 65; //setting a working height for now
+    //set random initial x & y coordinates and speed for each enemy; thanks to https://www.kirupa.com/html5/random_numbers_js.htm for the explanation 
     this.x = Math.floor(Math.random() * 11) + 15;
     this.y = Math.floor(Math.random() * 201) + 100;
-    this.speed = Math.floor(Math.random() * 151) + 50;
+    this.speed = Math.floor(Math.random() * 101) + 50;
     //the following allows the enemies to be unable to move under certain conditions courtesy of a hint from https://discussions.udacity.com/t/stopping-enemy-movement/241905
-    this.canMove = false;
+    this.canMove = true;
 };
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -38,22 +37,19 @@ Enemy.prototype.update = function(dt) {
     if (this.x + 25 > 500) {
         this.x = Math.floor(Math.random() * 11) + 15;
         this.y = Math.floor(Math.random() * 201) + 100;
-        this.speed = Math.floor(Math.random() * 151) + 50;
+        this.speed = Math.floor(Math.random() * 101) + 50;
     }
     //calls the checkCollisions function.
-    this.checkCollisions()
+    this.checkCollisions();
 };
-
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    drawBox(this.x, this.y, 100, 75, 'yellow');
+    //drawBox(this.x, this.y, 100, 75, 'yellow');
 };
 Enemy.prototype.checkCollisions = function() {
-
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
-
     if (player.x < this.x + this.width &&
         player.x + player.width > this.x &&
         (player.y) < this.y + this.height &&
@@ -62,28 +58,27 @@ Enemy.prototype.checkCollisions = function() {
         console.log("collision detected!");
         player.x = 225;
         player.y = 400;
-        //collide with a bug and the rocks move around too
+        //collide with a bug and the rocks are moved to random locations
         for (i = 0; i < allRocks.length; i++) {
             allRocks[i].update();
-        };
-        //plus you lose player lives
+        }
+        //plus a life point is deducted
         player.lives = player.lives - 1;
         player.displayLifeScore();
         //player.displayGemScore();
 
-    } else if (player.lives == 0 || player.lives < 0) {
+    } else if (player.lives === 0 || player.lives < 0) {
         player.gameLose();
     }
 };
-
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(x, y, lives, movement) {
     this.sprite = 'images/char-boy.png';
-    this.width = 90; //setting a working width
-    this.height = 85; //setting a working height
+    this.width = 80; //setting a working width
+    this.height = 80; //setting a working height
     //setting the initial location on the gameboard
     this.x = x;
     this.y = y;
@@ -95,7 +90,58 @@ var Player = function(x, y, lives, movement) {
 };
 
 Player.prototype.update = function(dt) {
-    //this.handleInput();
+    this.handleInput();
+
+    //if the player gets 15 lives or 10 gems, they win the game. 
+    if (player.lives == 15 || player.gemScore == 10) {
+        this.gameWin();
+    }
+    this.resetSides();
+    this.resetWater();
+    this.checkGemCollisions();
+
+    this.checkRockCollisions();
+    this.displayLifeScore();
+    this.displayGemScore();
+};
+
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite),
+        this.x, this.y);
+    //drawBox(this.x, this.y, 80, 80, 'blue');
+};
+//this displays the player's life score if it is above 0
+Player.prototype.displayLifeScore = function() {
+    if (player.lives > 0 && player.lives < 15) {
+        ctx.clearRect(25, 25, 100, 50);
+        ctx.font = '18px Sans Serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Lives: ' + player.lives, 25, 25);
+    }
+};
+
+//this displays the players gem count or score if the game has not ended
+Player.prototype.displayGemScore = function() {
+    if (player.gemScore < 10 && (player.lives > 0 && player.lives < 15)) {
+        ctx.clearRect(200, 25, 100, 50);
+        ctx.font = '18px Sans Serif';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Gems: ' + player.gemScore, 200, 25);
+    }
+};
+
+Player.prototype.resetWater = function() {
+    //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore;
+    if (this.y < 35) {
+        this.x = 225;
+        this.y = 435;
+        player.lives = player.lives + 1;
+        this.displayLifeScore();
+    }
+};
+
+Player.prototype.resetSides = function() {
+    //this keeps the player from moving off the board except upon reaching the water
     if (this.x > 425) {
         this.x = 400;
     }
@@ -103,47 +149,10 @@ Player.prototype.update = function(dt) {
         this.x = 15;
     }
     if (this.y > 455) {
-        this.y = 425;
-    }
-    //this resets the player's  position back to the original side once they reach the water and adds on a point to the lifescore;
-    if (this.y < 50) {
-        this.x = 225;
         this.y = 435;
-        player.lives = player.lives + 1;
-        this.displayLifeScore();
-
     }
-    //if the player gets 15 lives or 10 gems, they win the game. 
-    if (player.lives == 15 || player.gemScore == 10) {
-        this.gameWin();
-    }
-
-    this.checkGemCollisions();
-
-    this.checkRockCollisions();
-    // this.displayLifeScore();
-    // this.displayGemScore();
 };
-
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite),
-        this.x, this.y);
-    drawBox(this.x, this.y, 90, 85, 'blue');
-};
-//this displays the player's life score if it is above 0
-Player.prototype.displayLifeScore = function() {
-    if (player.lives > 0 && player.lives < 25) {
-        ctx.clearRect(25, 25, 100, 50);
-        ctx.font = '18px Sans Serif';
-        ctx.textBaseline = 'top';
-        ctx.fillText('Lives: ' + player.lives, 25, 25);
-    } //the next part tells it to simply draw a blank rectangle if the lives are 0 or less, or if the player has enough lives to win
-    else if (player.lives < 1 || player.lives == 15) {
-        ctx.clearRect(25, 25, 100, 50);
-    }
-
-};
-
+//this displays a message when the game is lost and clears the enemies off the screen
 Player.prototype.gameLose = function() {
     for (i = 0; i < allEnemies.length; i++) {
         //this moves the enemies off screen to end the game;
@@ -152,15 +161,14 @@ Player.prototype.gameLose = function() {
         allEnemies[i].move = false;
     }
     ctx.clearRect(25, 25, 600, 50);
-    ctx.fillStyle = 'red'
+    ctx.fillStyle = 'red';
     ctx.font = 'bold 20px Sans Serif';
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'center'
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
     ctx.fillText('Game over! Refresh the window to play again', 225, 25);
-}
-
+};
+//this displays a message when the game is won and clears the enemies off the screen
 Player.prototype.gameWin = function() {
-
     {
         for (i = 0; i < allEnemies.length; i++) {
             //this moves the enemies off screen to end the game;
@@ -169,14 +177,14 @@ Player.prototype.gameWin = function() {
             allEnemies[i].move = false;
         }
         ctx.clearRect(25, 25, 600, 50);
-        ctx.fillStyle = 'green'
+        ctx.fillStyle = 'green';
         ctx.font = 'bold 20px Sans Serif';
-        ctx.textBaseline = 'top'
-        ctx.textAlign = 'center'
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
         ctx.fillText('You won! Refresh the window to play again', 225, 25);
     }
-}
-
+};
+//this.movement is set in the player instantiation. It is the amount the player will move when the key is pressed. https://www.w3schools.com/graphics/game_controllers.asp, https://discussions.udacity.com/t/arcade-game-question/246212/70 and https://discussions.udacity.com/t/how-do-i-make-the-handleinput-listen-the-keys/162024  were helpful in understanding how this worked. 
 Player.prototype.handleInput = function(allowedKeys) {
     if (allowedKeys == 'left') {
         this.x -= this.movement;
@@ -184,20 +192,10 @@ Player.prototype.handleInput = function(allowedKeys) {
         this.x += this.movement;
     } else if (allowedKeys == 'up') {
         this.y -= this.movement;
-    } else {
+    } else if (allowedKeys == 'down') {
         this.y += this.movement;
     }
 };
-Player.prototype.displayGemScore = function() {
-    if (player.gemScore < 10) {
-        ctx.clearRect(200, 25, 100, 50);
-        ctx.font = '18px Sans Serif';
-        ctx.textBaseline = 'top';
-        ctx.fillText('Gems: ' + player.gemScore, 200, 25);
-
-    }
-};
-
 
 Player.prototype.checkGemCollisions = function() {
     //setting up the collision detection with the algorithm from https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection
@@ -207,13 +205,14 @@ Player.prototype.checkGemCollisions = function() {
         gem.y < this.y + this.height &&
         gem.height + gem.y > this.y) {
         player.y = 50;
+        player.lives = player.lives + 1;
         player.gemScore = player.gemScore + 1; {
-            console.log("You have " + player.gemScore + "gems!")
-        };
+            console.log("You have " + player.gemScore + "gems!");
+        }
         //this displays the number of gems
         player.displayGemScore();
         //this moves the gem to a new location
-        setTimeout(gem.update(), 5000)
+        setTimeout(gem.update(), 5000);
     }
 };
 
@@ -228,17 +227,15 @@ Player.prototype.checkRockCollisions = function() {
             player.x = player.x + (Math.floor(Math.random() * 26) + 25);
             //player.y = 400;
             player.lives = player.lives - 1; {
-                console.log("You hit a rock!")
-            };
+                console.log("You hit a rock!");
+            }
             player.displayLifeScore();
             //this moves the rock to a new location
-            setTimeout(allRocks[i].update(), 5000)
-
-
+            setTimeout(allRocks[i].update(), 5000);
         }
     }
 };
-
+//this provides an array of gem images that will be randomly selected from each time a gem appears
 var gemTypes = ['images/gem-blue.png', 'images/gem-orange.png', 'images/gem-green.png'];
 
 var Gem = function(x, y) {
@@ -248,46 +245,40 @@ var Gem = function(x, y) {
     this.height = 75;
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 301) + 100;
-}
+};
 
 Gem.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y, this.width, this.height);
-    drawBox(this.x, this.y, 65, 75, 'red');
+    //drawBox(this.x, this.y, 65, 75, 'red');
 };
 
 Gem.prototype.update = function() {
-
+    //this resets the gem to a new location that is randomly chosen
     gem.x = Math.floor(Math.random() * 301) + 100;
     gem.y = Math.floor(Math.random() * 301) + 100;
 };
 
-//this displays the players Gem count or score
-
 //this sets up rocks to randomly trip over. 
 var Rock = function(x, y) {
     this.sprite = 'images/rock.png';
-    this.width = 100;
-    this.height = 100;
+    this.width = 90;
+    this.height = 90;
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 276) + 100;
-
 };
 
 Rock.prototype.update = function() {
     this.x = Math.floor(Math.random() * 301) + 100;
     this.y = Math.floor(Math.random() * 276) + 100;
-
-
 };
+
 Rock.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite),
         this.x, this.y);
-    drawBox(this.x, this.y, 100, 100, 'green');
+    // drawBox(this.x, this.y, 100, 100, 'green');
     //this.width, this.height);
 };
-
-
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
@@ -300,7 +291,7 @@ var bug3 = new Enemy();
 var allEnemies = [bug1, bug2, bug3];
 
 //this sets the player with a given initial location, life number, and movement amount
-var player = new Player(225, 435, 10, 20);
+var player = new Player(225, 435, 10, 40);
 var gem = new Gem();
 var rock1 = new Rock();
 var rock2 = new Rock();
