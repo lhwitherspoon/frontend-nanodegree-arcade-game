@@ -4,7 +4,7 @@
 
 * To load the game, go to https://lhwitherspoon.github.io/frontend-nanodegree-arcade-game/. 
 * The bugs will start moving when you open up the link.
-* After winning or losing, refresh the browser window to reload the game, using the `REFRESH` symbol &#10227; on your browser. (If you do not see this symbol, check your browser's help documentation )
+* After winning or losing, refresh the browser window to reload the game, using the `REFRESH` symbol &#10227; on your browser. (If you do not see this symbol, check your browser's help documentation.
 
 ### Playing the Game:
 
@@ -15,7 +15,7 @@
 
 ### Objective
 
-This is a somewhat modified game of Frogger. The player must cross a paved path to get to the water on the other side. While crossing, the player must avoid colliding with either the bugs racing down the path or randomly appearing rocks. The player can pick up gems on the way. The game is won when the player collects 15 "lives" or 10 gems. The game is lost if the player has no lives left. A score will show up once the player has the first collision or collects the first gem.
+This is a somewhat modified game of Frogger. The player must cross a paved path to get to the water on the other side. While crossing, the player must avoid colliding with either the bugs racing down the path or randomly appearing rocks. The player can pick up gems on the way. The game is won when the player collects 15 "lives" or 10 gems. The game is lost if the player has no lives left. A score at the top left shows the lives left and a score in the center shows the number of gems collected. 
 
 #### Game Play Notes
 
